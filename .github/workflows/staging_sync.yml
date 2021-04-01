@@ -17,11 +17,22 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
+      - name: Auth aws
+        #run: something required to auth
+
       - name: Run AWS clear staging
-        run: echo "clear staging"
+        #run: aws s3 rm --recursive s3://nr-downloads-ohai-testing/infrastructure_agent --dryrun
 
       - name: Run AWS sync prod to staging
-        run: echo "sync prod to staging"
+        #run: aws s3 cp --exclude '*/infrastructure_agent/test/*' --exclude '*/newrelic-infra.repo' s3://nr-downloads-main/infrastructure_agent/ s3://nr-downloads-ohai-testing/infrastructure_agent/ --dryrun
 
       - name: Upload repo files for staging
         run: echo "upload repo files"
+        #aws s3 cp build/staging/repofiles/el6/newrelic-infra.repo s3://nr-downloads-ohai-testing/infrastructure_agent/linux/yum/el/6/x86_64/newrelic-infra.repo --dryrun
+        #aws s3 cp build/staging/repofiles/el7/newrelic-infra.repo s3://nr-downloads-ohai-testing/infrastructure_agent/linux/yum/el/7/x86_64/newrelic-infra.repo --dryrun
+        #aws s3 cp build/staging/repofiles/el8/newrelic-infra.repo s3://nr-downloads-ohai-testing/infrastructure_agent/linux/yum/el/8/x86_64/newrelic-infra.repo --dryrun
+        #aws s3 cp build/staging/repofiles/sles11.4/newrelic-infra.repo s3://nr-downloads-ohai-testing/infrastructure_agent/linux/zypp/sles/11.4/x86_64/newrelic-infra.repo --dryrun
+        #aws s3 cp build/staging/repofiles/sles12.1/newrelic-infra.repo s3://nr-downloads-ohai-testing/infrastructure_agent/linux/zypp/sles/12.1/x86_64/newrelic-infra.repo --dryrun
+        #aws s3 cp build/staging/repofiles/sles12.2/newrelic-infra.repo s3://nr-downloads-ohai-testing/infrastructure_agent/linux/zypp/sles/12.2/x86_64/newrelic-infra.repo --dryrun
+        #aws s3 cp build/staging/repofiles/sles12.3/newrelic-infra.repo s3://nr-downloads-ohai-testing/infrastructure_agent/linux/zypp/sles/12.3/x86_64/newrelic-infra.repo --dryrun
+        #aws s3 cp build/staging/repofiles/sles12.4/newrelic-infra.repo s3://nr-downloads-ohai-testing/infrastructure_agent/linux/zypp/sles/12.4/x86_64/newrelic-infra.repo --dryrun
