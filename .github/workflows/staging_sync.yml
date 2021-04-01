@@ -1,0 +1,27 @@
+name: Sync staging s3 with production state
+
+on:
+  workflow_dispatch:
+    inputs:
+      bucket:
+        description: 'type "staging" to confirm'
+        required: true
+
+jobs:
+  sync:
+    name: Sync staging s3 with production state
+    if: ${{ github.event.inputs.bucket == 'staging' }}
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Run AWS clear staging
+        run: echo "clear staging"
+
+      - name: Run AWS sync prod to staging
+        run: echo "sync prod to staging"
+
+      - name: Upload repo files for staging
+        run: echo "upload repo files"
