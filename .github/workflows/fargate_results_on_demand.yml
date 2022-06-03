@@ -1,0 +1,61 @@
+name: AWS Fargate results
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
+  workflow_dispatch:
+    inputs:
+      group_name:
+        description: 'AWS Logs group name'
+        required: true
+      stream_name:
+        description: 'AWS Logs stream name'
+        required: true
+
+
+env:
+  GROUP_NAME: ${{ secrets.ID_AWS_LOGS_GROUP_NAME }}
+  STREAM_NAME: ${{ secrets.ID_AWS_LOGS_STREAM_NAME }}
+  AWS_REGION: "us-east-2"
+  AWS_ACCESS_KEY_ID: ${{ secrets.ID_AWS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.ID_AWS_KEY }}
+
+jobs:
+  fargate-results:
+    name: AWS Fargate results
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run AWS ECS task definition
+        id: test
+        run: >-
+          echo ::set-output name=task_arn::$(
+          aws ecs run-task
+          --cluster test-id-packaging
+          --task-definition PoCCanaries:3
+          --network-configuration "${{ secrets.ID_AWS_TASK_CFG }}"
+          --launch-type FARGATE | jq '.tasks[0].taskArn')
+
+      - name: Populate AWS ECS task variables
+        id: populate
+        run: >-
+          echo ::set-output name=container_name::$(
+          aws ecs describe-tasks
+          --cluster test-id-packaging
+          --tasks ${{ steps.test.outputs.task_arn }} | jq '.tasks[0].containers[0].name')
+          echo ::set-output name=runtime_id::$(
+          aws ecs describe-tasks
+          --cluster test-id-packaging
+          --tasks ${{ steps.test.outputs.task_arn }} | jq -r '.tasks[0].containers[0].runtimeId')
+          echo ::set-output name=group_name::$(
+          aws ecs describe-tasks
+          --cluster test-id-packaging
+          --tasks ${{ steps.test.outputs.task_arn }} | jq -r '.tasks[0].group')
+          
+
+      - name: Fetching Fargate task logs
+        run: aws logs tail /ecs/${{ steps.populate.outputs.group_name }} --since 5d --log-stream-names ecs/${{ steps.populate.outputs.container_name }}/${{ steps.populate.outputs.runtime_id }} --format short
