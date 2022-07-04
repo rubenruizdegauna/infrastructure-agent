@@ -106,10 +106,10 @@ func (s *SystemSampler) Sample() (results sample.EventBatch, err error) {
 	seg.End()
 
 	ctx, seg = trx.StartSegment(ctx, "load sample")
-	if loadSample, err := s.LoadMonitor.Sample(); err != nil {
+	if l, err := s.LoadMonitor.Sample(); err != nil {
 		return nil, err
 	} else {
-		sample.LoadSample = loadSample
+		sample.LoadSample = l
 	}
 	seg.End()
 
