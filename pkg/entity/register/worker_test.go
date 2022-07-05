@@ -10,6 +10,7 @@ import (
 
 	"github.com/newrelic/infrastructure-agent/internal/instrumentation"
 	"github.com/newrelic/infrastructure-agent/pkg/backend/backoff"
+	agentlog "github.com/newrelic/infrastructure-agent/pkg/log"
 	log "github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
@@ -433,9 +434,10 @@ func TestWorker_send_Logging_VerboseEnabled(t *testing.T) {
 		err: nil,
 	}
 
-	config := WorkerConfig{
-		VerboseLogLevel: 1,
-	}
+	// set log level to debug
+	agentlog.SetLevel(log.DebugLevel)
+
+	config := WorkerConfig{}
 	w := NewWorker(agentIdentity, client, backoff.NewDefaultBackoff(), reqsToRegisterQueue, reqsRegisteredQueue, config, instrumentation.NoopMeasure)
 
 	batch := map[entity.Key]fwrequest.EntityFwRequest{
@@ -520,9 +522,10 @@ func TestWorker_send_Logging_VerboseDisabled(t *testing.T) {
 		err: nil,
 	}
 
-	config := WorkerConfig{
-		VerboseLogLevel: 0,
-	}
+	// set log level to info
+	agentlog.SetLevel(log.InfoLevel)
+
+	config := WorkerConfig{}
 	w := NewWorker(agentIdentity, client, backoff.NewDefaultBackoff(), reqsToRegisterQueue, reqsRegisteredQueue, config, instrumentation.NoopMeasure)
 
 	batch := map[entity.Key]fwrequest.EntityFwRequest{

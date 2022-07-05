@@ -68,7 +68,6 @@ type emitter struct {
 	registerMaxBatchSize      int
 	registerMaxBatchBytesSize int
 	registerMaxBatchTime      time.Duration
-	verboseLogLevel           int
 	measure                   instrumentation.Measure
 }
 
@@ -96,7 +95,6 @@ func NewEmitter(
 		registerMaxBatchSize:      defaultRegisterBatchSize,
 		registerMaxBatchBytesSize: defaultRegisterBatchBytesSize,
 		registerMaxBatchTime:      defaultRegisterBatchSecs * time.Second,
-		verboseLogLevel:           agentContext.Config().Verbose,
 		measure:                   measure,
 	}
 }
@@ -122,7 +120,6 @@ func (e *emitter) lazyLoadProcessor() {
 				MaxBatchSizeBytes: e.registerMaxBatchBytesSize,
 				MaxBatchDuration:  e.registerMaxBatchTime,
 				MaxRetryBo:        e.maxRetryBo,
-				VerboseLogLevel:   e.verboseLogLevel,
 			}
 			regWorker := register.NewWorker(
 				e.agentContext.Identity,
