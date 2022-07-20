@@ -37,6 +37,7 @@ type Emulator struct {
 	agent          *agent.Agent
 	integrationCfg v4.ManagerConfig
 	tempDir        string
+	runResult      chan error
 }
 
 func (ae *Emulator) ChannelHTTPRequests() chan http.Request {
@@ -80,6 +81,13 @@ func New(configsDir, tempBinDir string) *Emulator {
 func (ae *Emulator) Terminate() {
 	ae.agent.Terminate()
 	os.RemoveAll(ae.tempDir)
+
+	// context cancel function should make the agent.Run() function terminate
+	ae.agent.Context.CancelFn()
+	err := <-ae.runResult
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (ae *Emulator) RunAgent() error {
@@ -133,9 +141,7 @@ func (ae *Emulator) RunAgent() error {
 	}
 	go integrationManager.Start(ae.agent.Context.Ctx)
 	go func() {
-		if err := ae.agent.Run(); err != nil {
-			panic(err)
-		}
+		ae.runResult <- ae.agent.Run()
 	}()
 
 	return nil
