@@ -117,7 +117,7 @@ func TestWorker_Run_SendsWhenBatchLimitIsReached(t *testing.T) {
 			expectedBatchesCount: 1,
 			expectedEntityName:   [][]string{{"test-0", "test-1", "test-2", "test-3", "test-4"}},
 			batchDuration:        50 * time.Millisecond,
-			timeout:              100 * time.Millisecond,
+			timeout:              500 * time.Millisecond,
 		},
 		{
 			name:                 "given_a_batch_limit_of_2_entities_when_4_entities_are_submitted_then_register_is_called_in_2_batches",
@@ -127,7 +127,7 @@ func TestWorker_Run_SendsWhenBatchLimitIsReached(t *testing.T) {
 			expectedBatchesCount: 2,
 			expectedEntityName:   [][]string{{"test-0", "test-1"}, {"test-2", "test-3"}},
 			batchDuration:        50 * time.Millisecond,
-			timeout:              100 * time.Millisecond,
+			timeout:              500 * time.Millisecond,
 		},
 		{
 			name:                 "given_a_batch_limit_of_2_entities_when_3_entities_are_submitted_then_register_is_called_with_1_batch_by_limit_and_other_batch_by_timer",
@@ -137,7 +137,7 @@ func TestWorker_Run_SendsWhenBatchLimitIsReached(t *testing.T) {
 			expectedBatchesCount: 1,
 			expectedEntityName:   [][]string{{"test-0", "test-1"}, {"test-2"}},
 			batchDuration:        50 * time.Millisecond,
-			timeout:              200 * time.Millisecond,
+			timeout:              500 * time.Millisecond,
 		},
 		{
 			name:                 "given_a_batch_byte_limit_of_2_entities_size_when_2_entities_are_submitted_then_register_is_called_in_a_single_batch",
@@ -147,7 +147,7 @@ func TestWorker_Run_SendsWhenBatchLimitIsReached(t *testing.T) {
 			expectedBatchesCount: 1,
 			expectedEntityName:   [][]string{{"test-0", "test-1"}},
 			batchDuration:        time.Second,
-			timeout:              100 * time.Millisecond,
+			timeout:              500 * time.Millisecond,
 		},
 		{
 			name:                 "given_a_batch_byte_limit_of_2_entities_size_when_3_entities_are_submitted_then_register_is_called_with_1_batch_by_limit_and_other_batch_by_timer",
@@ -157,7 +157,7 @@ func TestWorker_Run_SendsWhenBatchLimitIsReached(t *testing.T) {
 			expectedBatchesCount: 1,
 			expectedEntityName:   [][]string{{"test-0", "test-1"}, {"test-2"}},
 			batchDuration:        50 * time.Millisecond,
-			timeout:              100 * time.Millisecond,
+			timeout:              500 * time.Millisecond,
 		},
 	}
 
