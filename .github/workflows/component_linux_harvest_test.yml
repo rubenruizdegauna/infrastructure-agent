@@ -21,8 +21,17 @@ jobs:
         with:
           go-version: ${{env.GO_VERSION}}
 
+      - run: |
+          # https://github.com/actions/setup-go/issues/107
+          which go
+          cp -f `which go` /usr/bin/go
+          go version
+          sudo -E go version
+          sudo -E env
+          sudo env
+
       - name: Setup node
         run: sudo apt install musl-dev
 
       - name: Running Harvest tests
-        run: sudo make linux/harvest-tests
+        run: sudo -E make linux/harvest-tests
