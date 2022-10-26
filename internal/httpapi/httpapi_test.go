@@ -36,7 +36,6 @@ type HTTPAPITestSuite struct {
 }
 
 func TestHTTPAPITestSuite(t *testing.T) {
-	t.Parallel()
 	suite.Run(t, new(HTTPAPITestSuite))
 }
 
@@ -287,8 +286,6 @@ func (suite *HTTPAPITestSuite) TestServe_IngestData_mTLS() {
 	for _, testCase := range cases {
 		testCase := testCase
 		suite.T().Run(testCase.name, func(t *testing.T) {
-			t.Parallel()
-
 			port, err := networkHelpers.TCPPort()
 			require.NoError(t, err)
 
