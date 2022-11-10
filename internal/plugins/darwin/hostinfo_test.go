@@ -6,10 +6,15 @@
 package darwin
 
 import (
+	"github.com/newrelic/infrastructure-agent/internal/plugins/common"
+	testing2 "github.com/newrelic/infrastructure-agent/internal/plugins/testing"
+	"github.com/newrelic/infrastructure-agent/pkg/sysinfo/cloud"
+	"reflect"
 	"testing"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	. "gopkg.in/check.v1"
 )
 
 func TestGetKernelRelease_Success(t *testing.T) {
@@ -116,4 +121,43 @@ func TestValidateHardwareUUID(t *testing.T) {
 			assert.Equal(t, test.expected, validateHardwareUUID(test.input))
 		})
 	}
+}
+
+type HostinfoSuite struct {
+	agent *testing2.MockAgent
+}
+
+var _ = Suite(&HostinfoSuite{})
+
+var osRelease string
+
+func (s *HostinfoSuite) SetUpSuite(c *C) {
+}
+
+func (s *HostinfoSuite) TearDownSuite(c *C) {
+}
+
+func (s *HostinfoSuite) SetUpTest(c *C) {
+	s.agent = testing2.NewMockAgent()
+}
+
+func (s *HostinfoSuite) TestGatherHostInfo(c *C) {
+	cloudHarvester := common.FakeCloudHarvester{}
+	cloudHarvester.On("GetCloudType").Return(cloud.TypeAWS)
+	cloudHarvester.On("GetRegion").Return("us-east-1", nil)
+	cloudHarvester.On("GetZone").Return("us-east-1a", nil)
+	cloudHarvester.On("GetInstanceImageID").Return("ami-12345", nil)
+	cloudHarvester.On("GetAccountID").Return("x123", nil)
+
+	hip := HostinfoPlugin{
+		readDataFromCmd: func(cmd string, args ...string) (string, error) {
+			return "", errors.New("error")
+		},
+		cloudHarvester: &common.FakeCloudHarvester{},
+	}
+
+	actual := hip.gatherHostinfo(s.agent)
+
+	c.Assert(reflect.ValueOf(actual.AwsCloudData).IsZero(), Equals, false)
+	c.Assert(actual.RegionAWS, Equals, "us-east-1")
 }

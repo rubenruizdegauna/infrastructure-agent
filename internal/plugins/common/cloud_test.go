@@ -6,72 +6,14 @@ package common
 import (
 	"github.com/newrelic/infrastructure-agent/pkg/sysinfo/cloud"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"testing"
 )
-
-type fakeHarvester struct {
-	mock.Mock
-}
-
-// GetInstanceID will return the id of the cloud instance.
-func (f *fakeHarvester) GetInstanceID() (string, error) {
-	args := f.Called()
-	return args.String(0), args.Error(1)
-}
-
-// GetHostType will return the cloud instance type.
-func (f *fakeHarvester) GetHostType() (string, error) {
-	args := f.Called()
-	return args.String(0), args.Error(1)
-}
-
-// GetCloudType will return the cloud type on which the instance is running.
-func (f *fakeHarvester) GetCloudType() cloud.Type {
-	args := f.Called()
-	return args.Get(0).(cloud.Type)
-}
-
-// Returns a string key which will be used as a HostSource (see host_aliases plugin).
-func (f *fakeHarvester) GetCloudSource() string {
-	args := f.Called()
-	return args.String(0)
-}
-
-// GetRegion returns the cloud region
-func (f *fakeHarvester) GetRegion() (string, error) {
-	args := f.Called()
-	return args.String(0), args.Error(1)
-}
-
-// GetZone returns the cloud zone (availability zone)
-func (f *fakeHarvester) GetZone() (string, error) {
-	args := f.Called()
-	return args.String(0), args.Error(1)
-}
-
-// GetAccount returns the cloud account ID
-func (f *fakeHarvester) GetAccountID() (string, error) {
-	args := f.Called()
-	return args.String(0), args.Error(1)
-}
-
-// GetImageID returns the cloud instance ID
-func (f *fakeHarvester) GetInstanceImageID() (string, error) {
-	args := f.Called()
-	return args.String(0), args.Error(1)
-}
-
-// GetHarvester returns instance of the Harvester detected (or instance of themselves)
-func (f *fakeHarvester) GetHarvester() (cloud.Harvester, error) {
-	return f, nil
-}
 
 func TestGetCloudData(t *testing.T) {
 	testCases := []struct {
 		name       string
 		assertions func(data *HostInfoData)
-		setMock    func(*fakeHarvester)
+		setMock    func(*FakeCloudHarvester)
 	}{
 		{
 			name: "no cloud",
@@ -81,7 +23,7 @@ func TestGetCloudData(t *testing.T) {
 				assert.Equal(t, "", d.RegionGCP)
 				assert.Equal(t, "", d.RegionAlibaba)
 			},
-			setMock: func(h *fakeHarvester) {
+			setMock: func(h *FakeCloudHarvester) {
 				h.On("GetCloudType").Return(cloud.TypeNoCloud)
 			},
 		},
@@ -96,7 +38,7 @@ func TestGetCloudData(t *testing.T) {
 				assert.Equal(t, "", d.RegionGCP)
 				assert.Equal(t, "", d.RegionAlibaba)
 			},
-			setMock: func(h *fakeHarvester) {
+			setMock: func(h *FakeCloudHarvester) {
 				h.On("GetCloudType").Return(cloud.TypeAWS)
 				h.On("GetRegion").Return("us-east-1", nil)
 				h.On("GetZone").Return("us-east-1a", nil)
@@ -114,7 +56,7 @@ func TestGetCloudData(t *testing.T) {
 				assert.Equal(t, "1", d.AzureAvailabilityZone)
 				assert.Equal(t, "x123", d.AzureSubscriptionID)
 			},
-			setMock: func(h *fakeHarvester) {
+			setMock: func(h *FakeCloudHarvester) {
 				h.On("GetAccountID").Return("x123", nil)
 				h.On("GetCloudType").Return(cloud.TypeAzure)
 				h.On("GetRegion").Return("northeurope", nil)
@@ -129,7 +71,7 @@ func TestGetCloudData(t *testing.T) {
 				assert.Equal(t, "us-east-1", d.RegionGCP)
 				assert.Equal(t, "", d.RegionAlibaba)
 			},
-			setMock: func(h *fakeHarvester) {
+			setMock: func(h *FakeCloudHarvester) {
 				h.On("GetCloudType").Return(cloud.TypeGCP)
 				h.On("GetRegion").Return("us-east-1", nil)
 			},
@@ -142,7 +84,7 @@ func TestGetCloudData(t *testing.T) {
 				assert.Equal(t, "", d.RegionGCP)
 				assert.Equal(t, "us-east-1", d.RegionAlibaba)
 			},
-			setMock: func(h *fakeHarvester) {
+			setMock: func(h *FakeCloudHarvester) {
 				h.On("GetCloudType").Return(cloud.TypeAlibaba)
 				h.On("GetRegion").Return("us-east-1", nil)
 			},
@@ -151,7 +93,7 @@ func TestGetCloudData(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			h := new(fakeHarvester)
+			h := new(FakeCloudHarvester)
 			testCase.setMock(h)
 			data := &HostInfoData{}
 			cloudData, err := GetCloudData(h)
