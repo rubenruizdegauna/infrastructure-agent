@@ -69,6 +69,7 @@ func (f *fakeHarvester) GetHarvester() (cloud.Harvester, error) {
 }
 
 func TestGetHostInfo(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name       string
 		assertions func(data *HostInfoData)
@@ -168,6 +169,7 @@ func TestGetHostInfo(t *testing.T) {
 }
 
 func TestGetCloudHostType(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name       string
 		assertions func(string, error)
