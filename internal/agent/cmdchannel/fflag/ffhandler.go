@@ -23,15 +23,14 @@ const (
 	FlagProtocolV4           = "protocol_v4_enabled"
 	FlagFullProcess          = "full_process_sampling"
 	FlagDmRegisterDeprecated = "dm_register_deprecated"
+	FlagFluentBit19          = "fluent_bit_19"
 	// Config
 	CfgYmlRegisterEnabled        = "register_enabled"
 	CfgYmlParallelizeInventory   = "inventory_queue_len"
 	CfgValueParallelizeInventory = int64(100) // default value when no config provided by user and FF enabled
 )
 
-var (
-	ffLogger = log.WithComponent("FeatureFlagHandler")
-)
+var ffLogger = log.WithComponent("FeatureFlagHandler")
 
 type args struct {
 	Category string

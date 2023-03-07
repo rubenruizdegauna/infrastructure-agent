@@ -1,5 +1,7 @@
-// Copyright 2020 New Relic Corporation. All rights reserved.
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Copyright 2021 New Relic Corporation. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package v4
 
 import (
@@ -9,9 +11,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/newrelic/infrastructure-agent/internal/agent/cmdchannel/fflag"
+
+	"github.com/newrelic/infrastructure-agent/internal/feature_flags"
+	"github.com/newrelic/infrastructure-agent/pkg/config"
 
 	"github.com/newrelic/infrastructure-agent/pkg/sysinfo/hostname"
+	"github.com/pkg/errors"
 
 	"github.com/newrelic/infrastructure-agent/pkg/entity"
 	"github.com/newrelic/infrastructure-agent/pkg/sample"
@@ -24,15 +30,45 @@ import (
 
 var sFBLogger = log.WithComponent("integrations.Supervisor").WithField("process", "log-forwarder")
 
-type FBSupervisorConfig struct {
+type fBSupervisorConfig struct {
 	FluentBitExePath     string
 	FluentBitNRLibPath   string
 	FluentBitParsersPath string
 	FluentBitVerbose     bool
 }
 
+func NewSupervisorConfig(
+	retriever feature_flags.Retriever,
+	agentDir string,
+	fluentBitExePath string,
+	loggingBinDir string,
+	fluentBitNRLibPath string,
+	fluentBitParsersPath string,
+	logConfig config.LogConfig,
+) fBSupervisorConfig {
+	// Get FF
+	enabled, exists := retriever.GetFeatureFlag(fflag.FlagFluentBit19)
+	// value from config rules
+	if loggingBinDir == "" {
+		loggingBinDir = defaultLoggingBinDir(exists, enabled, agentDir)
+	}
+
+	if fluentBitExePath == "" {
+		if !exists || !enabled {
+			fluentBitExePath = defaultFluentBitExePath(exists, enabled, loggingBinDir)
+		}
+	}
+
+	return fBSupervisorConfig{
+		FluentBitExePath:     fluentBitExePath,
+		FluentBitNRLibPath:   fluentBitNRLibPath,
+		FluentBitParsersPath: fluentBitParsersPath,
+		FluentBitVerbose:     logConfig.Level == config.LogLevelTrace && logConfig.HasIncludeFilter(config.TracesFieldName, config.SupervisorTrace),
+	}
+}
+
 // IsLogForwarderAvailable checks whether all the required files for FluentBit execution are available
-func (c *FBSupervisorConfig) IsLogForwarderAvailable() bool {
+func (c *fBSupervisorConfig) IsLogForwarderAvailable() bool {
 	if _, err := os.Stat(c.FluentBitExePath); err != nil {
 		sFBLogger.WithField("fbExePath", c.FluentBitExePath).Debug("Fluent Bit exe not found.")
 		return false
@@ -55,7 +91,7 @@ type SendEventFn func(event sample.Event, entityKey entity.Key)
 var ObserverName = "LogForwarderSupervisor" // nolint:gochecknoglobals
 
 // NewFBSupervisor builds a Fluent Bit supervisor which forwards the output to agent logs.
-func NewFBSupervisor(fbIntCfg FBSupervisorConfig, cfgLoader *logs.CfgLoader, agentIDNotifier id.UpdateNotifyFn, notifier hostname.ChangeNotifier, sendEventFn SendEventFn) *Supervisor {
+func NewFBSupervisor(fbIntCfg fBSupervisorConfig, cfgLoader *logs.CfgLoader, agentIDNotifier id.UpdateNotifyFn, notifier hostname.ChangeNotifier, sendEventFn SendEventFn) *Supervisor {
 	return &Supervisor{
 		listenAgentIDChanges:   agentIDNotifier,
 		hostnameChangeNotifier: notifier,
@@ -86,7 +122,7 @@ func fbPostRunActions(sendEventFn SendEventFn) func(ctx2.Context, cmdExitStatus)
 }
 
 // buildFbExecutor builds the function required by supervisor when running the process.
-func buildFbExecutor(fbIntCfg FBSupervisorConfig, cfgLoader *logs.CfgLoader) func() (Executor, error) {
+func buildFbExecutor(fbIntCfg fBSupervisorConfig, cfgLoader *logs.CfgLoader) func() (Executor, error) {
 	return func() (Executor, error) {
 		cfgContent, externalCfg, cErr := cfgLoader.LoadAndFormat()
 		if cErr != nil {

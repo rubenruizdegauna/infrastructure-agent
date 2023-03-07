@@ -75,5 +75,6 @@
     # Required packages. rpm version 4.11.3 does not support weak dependencies
     dependencies:
       - td-agent-bit
+      - fluent-bit
   
   # end CentOS 7 amd64

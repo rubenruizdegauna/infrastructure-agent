@@ -74,16 +74,23 @@ Function EmbedFluentBit {
     Write-Output "--- Embedding fluent-bit"
 
     $pluginVersion = GetFluentBitPluginVersion
+    $nrfbLegacyVersion = GetFluentBitLegacyVersion
     $nrfbVersion = GetFluentBitVersion
 
     [string]$pluginUrl = "https://github.com/newrelic/newrelic-fluent-bit-output/releases/download/v$pluginVersion/out_newrelic-windows-$arch-$pluginVersion.dll"
     DownloadFile -dest:"$downloadPath\logging\nrfb" -outFile:"out_newrelic.dll" -url:"$pluginUrl"
 
-    [string]$nrfbUrl = "https://github.com/newrelic-experimental/fluent-bit-package/releases/download/$nrfbVersion/fb-windows-$arch.zip"
+    # td-agent-bit (1.9)
+    [string]$nrfbUrl = "https://github.com/newrelic-experimental/fluent-bit-package/releases/download/$nrfbLegacyVersion/fb-windows-$arch.zip"
     DownloadAndExtractZip -dest:"$downloadPath\logging\nrfb" -url:"$nrfbUrl"
+
+    # fluent-bit (2.x)
+    #[string]$nrfbUrl = "https://github.com/newrelic-experimental/fluent-bit-package/releases/download/$nrfbVersion/fb-windows-$arch.zip"
+    #DownloadAndExtractZip -dest:"$downloadPath\logging\nrfb2" -url:"$nrfbUrl"
 
     if (-Not $skipSigning) {
         SignExecutable -executable "$downloadPath\logging\nrfb\fluent-bit.exe"
+        SignExecutable -executable "$downloadPath\logging\nrfb2\fluent-bit.exe"
     }
 }
 

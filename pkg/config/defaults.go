@@ -121,12 +121,13 @@ var (
 	defaultPluginInstanceDir       string
 	defaultConfigDir               string
 	defaultLoggingConfigsDir       string
-	defaultLoggingBinDir           string
 	defaultLoggingHomeDir          string
-	defaultFluentBitExe            string
 	defaultFluentBitParsers        string
 	defaultFluentBitNRLib          string
 	defaultIntegrationsTempDir     string
+	// Move to FB under FF
+	// defaultLoggingBinDir           string
+	// defaultFluentBitExe        string
 )
 
 func getDefaultFacterHomeDir() (string, error) {

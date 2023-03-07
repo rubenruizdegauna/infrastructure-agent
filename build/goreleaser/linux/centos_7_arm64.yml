@@ -74,5 +74,6 @@
     # disabled until logging packaging is properly handled for arm
     dependencies:
       - td-agent-bit
+      - fluent-bit
   
   # end CentOS 7 arm64

@@ -28,12 +28,12 @@ func TestFBSupervisorConfig_IsLogForwarderAvailable(t *testing.T) {
 	// GIVEN / THEN
 	tests := []struct {
 		name string
-		cfg  FBSupervisorConfig
+		cfg  fBSupervisorConfig
 		want bool
 	}{
 		{
 			"incorrect: all non-existing",
-			FBSupervisorConfig{
+			fBSupervisorConfig{
 				FluentBitExePath:     nonExisting,
 				FluentBitNRLibPath:   nonExisting,
 				FluentBitParsersPath: nonExisting,
@@ -42,7 +42,7 @@ func TestFBSupervisorConfig_IsLogForwarderAvailable(t *testing.T) {
 		},
 		{
 			"incorrect: NR lib and parsers do not exist",
-			FBSupervisorConfig{
+			fBSupervisorConfig{
 				FluentBitExePath:     existing,
 				FluentBitNRLibPath:   nonExisting,
 				FluentBitParsersPath: nonExisting,
@@ -51,7 +51,7 @@ func TestFBSupervisorConfig_IsLogForwarderAvailable(t *testing.T) {
 		},
 		{
 			"incorrect: parsers doesn't exist",
-			FBSupervisorConfig{
+			fBSupervisorConfig{
 				FluentBitExePath:     existing,
 				FluentBitNRLibPath:   existing,
 				FluentBitParsersPath: nonExisting,
@@ -60,7 +60,7 @@ func TestFBSupervisorConfig_IsLogForwarderAvailable(t *testing.T) {
 		},
 		{
 			"correct configuration",
-			FBSupervisorConfig{
+			fBSupervisorConfig{
 				FluentBitExePath:     existing,
 				FluentBitNRLibPath:   existing,
 				FluentBitParsersPath: existing,
@@ -88,7 +88,7 @@ func TestFBSupervisorConfig_IsLogForwarderAvailable(t *testing.T) {
 func TestFBSupervisorConfig_LicenseKeyShouldBePassedAsEnvVar(t *testing.T) {
 	t.Parallel()
 
-	fbConf := FBSupervisorConfig{}
+	fbConf := fBSupervisorConfig{}
 	agentIdentity := func() entity.Identity {
 		return entity.Identity{ID: 13}
 	}

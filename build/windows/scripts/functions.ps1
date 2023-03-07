@@ -40,11 +40,20 @@ Function GetFluentBitPluginVersion {
 
     return $pluginVersion
 }
+Function GetFluentBitLegacyVersion {
+    $dir = "$scriptPath\..\..\embed"
+    $fbVersion = $(Get-Content "$dir/fluent-bit.version" | %{if($_ -match "^windows-legacy,") { $_.Split(',')[2]; }})
+    if ([string]::IsNullOrWhitespace($fbVersion)) {
+        throw "failed to read nr fluent-bit 1.x version"
+    }
+
+    return $fbVersion
+}
 Function GetFluentBitVersion {
     $dir = "$scriptPath\..\..\embed"
-    $fbVersion = $(Get-Content "$dir/fluent-bit.version" | %{if($_ -match "^windows") { $_.Split(',')[2]; }})
+    $fbVersion = $(Get-Content "$dir/fluent-bit.version" | %{if($_ -match "^windows,") { $_.Split(',')[2]; }})
     if ([string]::IsNullOrWhitespace($fbVersion)) {
-        throw "failed to read nr fluent-bit version"
+        throw "failed to read nr fluent-bit 2.x version"
     }
 
     return $fbVersion

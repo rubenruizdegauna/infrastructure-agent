@@ -78,5 +78,6 @@
     # Recommended packages. If they fail to install installation of the agent will not be interrupted.
     recommends:
       - td-agent-bit
+      - fluent-bit
   
   # end SLES 12.5 amd64
