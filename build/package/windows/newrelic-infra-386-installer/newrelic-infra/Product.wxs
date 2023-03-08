@@ -269,23 +269,23 @@
   </Fragment>
   <Fragment>
     <ComponentGroup Id="LoggingToolFB2Components" Directory="LoggingToolFB2">
-        <Component Id="CMP_LOGGING_TOOL_FB2_BIN" Guid="A6D1104A-F822-4D5C-AD0E-7B90B4CADA81" Win64="no">
-          <File Id="FILE_LOGGING_TOOL_BIN"
+        <Component Id="CMP_LOGGING_FB2_TOOL_BIN" Guid="A6D1104A-F822-4D5C-AD0E-7B90B4CADA81" Win64="no">
+          <File Id="FILE_LOGGING_FB2_TOOL_BIN"
               Source="$(var.EmbedBinariesPath)logging\nrfb2\fluent-bit.exe"
                 KeyPath="yes" />
         </Component>
-        <Component Id="CMP_LOGGING_TOOL_FB2_DLL" Guid="7F9069E1-BBFB-4A3F-966E-8E3C092E23C6" Win64="no">
-          <File Id="FILE_LOGGING_TOOL_DLL"
+        <Component Id="CMP_LOGGING_FB2_TOOL_DLL" Guid="7F9069E1-BBFB-4A3F-966E-8E3C092E23C6" Win64="no">
+          <File Id="FILE_LOGGING_FB2_TOOL_DLL"
               Source="$(var.EmbedBinariesPath)logging\nrfb2\fluent-bit.dll"
                 KeyPath="yes" />
         </Component>
-        <Component Id="CMP_NR_LOGGING_TOOL_FB2_DLL" Guid="FA321297-4693-4402-BE78-105B0234C75A" Win64="no">
-          <File Id="FILE_NR_LOGGING_TOOL_FB2_DLL"
+        <Component Id="CMP_NR_LOGGING_FB2_TOOL_DLL" Guid="FA321297-4693-4402-BE78-105B0234C75A" Win64="no">
+          <File Id="FILE_NR_LOGGING_FB2_TOOL_DLL"
               Source="$(var.EmbedBinariesPath)logging\nrfb2\out_newrelic.dll"
                 KeyPath="yes" />
         </Component>
-        <Component Id="CMP_NR_LOGGING_TOOL_FB2_PARSERS" Guid="C99EA5B8-447F-4653-821B-BF30F994F4CE" Win64="no">
-          <File Id="FILE_NR_LOGGING_TOOL_FB2_PARSERS"
+        <Component Id="CMP_NR_LOGGING_FB2_TOOL_PARSERS" Guid="C99EA5B8-447F-4653-821B-BF30F994F4CE" Win64="no">
+          <File Id="FILE_NR_LOGGING_FB2_TOOL_PARSERS"
               Source="$(var.ExternalFilesPath)examples\logging\parsers.conf"
                 KeyPath="yes" />
         </Component>
