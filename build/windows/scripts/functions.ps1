@@ -30,10 +30,21 @@ Function GetIntegrationVersion {
     return $version
 }
 
+Function GetFluentBitLegacyPluginVersion {
+    $dir = "$scriptPath\..\..\embed"
+
+    $pluginVersion = $(Get-Content "$dir/fluent-bit.version" | %{if($_ -match "^windows-legacy,") { $_.Split(',')[1]; }})
+    if ([string]::IsNullOrWhitespace($pluginVersion)) {
+        throw "failed to read nr fluent-bit plugin version"
+    }
+
+    return $pluginVersion
+}
+
 Function GetFluentBitPluginVersion {
     $dir = "$scriptPath\..\..\embed"
 
-    $pluginVersion = $(Get-Content "$dir/fluent-bit.version" | %{if($_ -match "^windows") { $_.Split(',')[1]; }})
+    $pluginVersion = $(Get-Content "$dir/fluent-bit.version" | %{if($_ -match "^windows,") { $_.Split(',')[1]; }})
     if ([string]::IsNullOrWhitespace($pluginVersion)) {
         throw "failed to read nr fluent-bit plugin version"
     }
