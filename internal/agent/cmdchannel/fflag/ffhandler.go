@@ -5,6 +5,7 @@ package fflag
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 
 	"github.com/newrelic/infrastructure-agent/internal/agent/cmdchannel"
@@ -23,15 +24,15 @@ const (
 	FlagProtocolV4           = "protocol_v4_enabled"
 	FlagFullProcess          = "full_process_sampling"
 	FlagDmRegisterDeprecated = "dm_register_deprecated"
+	FlagFluentBit19          = "fluent_bit_19"
 	// Config
 	CfgYmlRegisterEnabled        = "register_enabled"
 	CfgYmlParallelizeInventory   = "inventory_queue_len"
 	CfgValueParallelizeInventory = int64(100) // default value when no config provided by user and FF enabled
 )
 
-var (
-	ffLogger = log.WithComponent("FeatureFlagHandler")
-)
+//nolint:gochecknoglobals
+var ffLogger = log.WithComponent("FeatureFlagHandler")
 
 type args struct {
 	Category string
@@ -41,17 +42,22 @@ type args struct {
 
 // handler handles FF commands.
 type handler struct {
-	cfg        *config.Config
-	ohiEnabler OHIEnabler
-	ffSetter   feature_flags.Setter
-	ffsState   handledStatePerFF
-	logger     log.Entry
+	cfg         *config.Config
+	ohiEnabler  OHIEnabler
+	fbRestarter FBRestarter
+	ffSetter    feature_flags.Setter
+	ffsState    handledStatePerFF
+	logger      log.Entry
 }
 
 // OHIEnabler enables or disables an OHI via cmd-channel feature flag.
 type OHIEnabler interface {
 	EnableOHIFromFF(ctx context.Context, featureFlag string) error
 	DisableOHIFromFF(featureFlag string) error
+}
+
+type FBRestarter interface {
+	Restart() error
 }
 
 // represents the state of an FF: non handled, handled to enable, handled to disable or both.
@@ -113,6 +119,12 @@ func (h *handler) SetOHIHandler(e OHIEnabler) {
 	h.ohiEnabler = e
 }
 
+// SetFBRestarter injects the handler dependency. A proper refactor of agent services injection will
+// be required for this to be injected via srv constructor.
+func (h *handler) SetFBRestarter(fbr FBRestarter) {
+	h.fbRestarter = fbr
+}
+
 func (h *handler) Handle(ctx context.Context, c commandapi.Command, isInitialFetch bool) (err error) {
 	var ffArgs args
 	if err = json.Unmarshal(c.Args, &ffArgs); err != nil {
@@ -131,6 +143,13 @@ func (h *handler) Handle(ctx context.Context, c commandapi.Command, isInitialFet
 
 	if ffArgs.Flag == FlagNameRegister {
 		handleRegister(ffArgs, h.cfg, isInitialFetch)
+
+		return
+	}
+
+	if ffArgs.Flag == FlagFluentBit19 {
+		h.handleFBRestart(ffArgs)
+
 		return
 	}
 
@@ -231,6 +250,38 @@ func handleParallelizeInventory(ffArgs args, c *config.Config, isInitialFetch bo
 			WithError(err).
 			WithField("field", CfgYmlParallelizeInventory).
 			Warn("unable to update config value")
+	}
+}
+
+func (h *handler) handleFBRestart(ffArgs args) {
+	err := h.ffSetter.SetFeatureFlag(ffArgs.Flag, ffArgs.Enabled)
+	if err != nil {
+		// ignore if the FF has been already set
+		if errors.Is(err, feature_flags.ErrFeatureFlagAlreadyExists) {
+			return
+		}
+
+		ffLogger.
+			WithError(err).
+			WithField("feature_flag", ffArgs.Flag).
+			WithField("enable", ffArgs.Enabled).
+			Debug("Cannot set feature flag configuration.")
+
+		return
+	}
+
+	if h.fbRestarter == nil {
+		ffLogger.Debug("No fbRestarter for cmd feature request.")
+
+		return
+	}
+
+	err = h.fbRestarter.Restart()
+	if err != nil {
+		ffLogger.
+			WithError(err).
+			WithField("enabled", ffArgs.Enabled).
+			Debug("Unable to restart fb")
 	}
 }
 
