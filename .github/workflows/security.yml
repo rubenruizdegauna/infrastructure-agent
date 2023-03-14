@@ -64,4 +64,3 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: "high,critical"
-          skip-dirs: "/var"
