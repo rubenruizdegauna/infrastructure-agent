@@ -220,7 +220,7 @@ func fallbackDialer(transport *http.Transport) func(network string, addr string)
 			return conn, err
 		}
 		switch err.(type) {
-		case x509.UnknownAuthorityError:
+		case x509.UnknownAuthorityError, *tls.CertificateVerificationError:
 			plog.WithError(err).Debug("Usual, secured configuration did not work as expected. Retrying with verification skip.")
 			// if in the previous request we received an authority error, we skip verification and
 			// continue using tlsDialer directly from now on
