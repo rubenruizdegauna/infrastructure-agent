@@ -3,7 +3,6 @@ name: . 🧹 Linux | Run validate and linter
 on:
   workflow_call:
 
-
 jobs:
   validate:
     name: Validate code
@@ -21,9 +20,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
-
-      - name: Modify go.mod version to support golangci-lint
-        run: sed -i 's/go 1\.20/go 1\.17/' go.mod
 
       - name: Install Go
         uses: actions/setup-go@v4

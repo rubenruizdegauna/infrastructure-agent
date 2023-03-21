@@ -3,9 +3,6 @@ name: . 🧹 macOS | Run validate and linter
 on:
   workflow_call:
 
-env:
-  GO_VERSION: '1.20.2'
-
 jobs:
 
   run-lint:
@@ -17,9 +14,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
-
-      - name: Modify go.mod version to support golangci-lint
-        run: sed -i -e 's/go 1\.20/go 1\.17/' go.mod
 
       - name: Install Go
         uses: actions/setup-go@v4
