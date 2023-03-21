@@ -221,11 +221,11 @@ func fallbackDialer(transport *http.Transport) func(network string, addr string)
 			return conn, err
 		}
 
-		var unknownAuthorityErr x509.UnknownAuthorityError
-		var recordHeaderError tls.RecordHeaderError
+		var certVerifyErr *tls.CertificateVerificationError
+		var recordHeaderErr tls.RecordHeaderError
 
 		switch {
-		case errors.Is(err, unknownAuthorityErr):
+		case errors.Is(err, certVerifyErr):
 			plog.WithError(err).Debug("Usual, secured configuration did not work as expected. Retrying with verification skip.")
 			// if in the previous request we received an authority error, we skip verification and
 			// continue using tlsDialer directly from now on
@@ -237,7 +237,7 @@ func fallbackDialer(transport *http.Transport) func(network string, addr string)
 			// we will use tlsDialer directly from now on, with the insecure skip configuration
 			transport.DialTLS = tlsDialer(transport)
 			return transport.DialTLS(network, addr)
-		case errors.Is(err, recordHeaderError):
+		case errors.Is(err, recordHeaderErr):
 			plog.WithError(err).Debug("Usual, secured configuration did not work as expected. Retrying with HTTP dialing.")
 			// if the problem was due to a non-https connection, we use a non-tls dialer directly
 			// from now on
